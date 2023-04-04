@@ -1,29 +1,46 @@
 package Client;
 
-import Protocol.*;
-
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.CountDownLatch;
 
-public class ClientService {
-    Selector selector;
-    SocketChannel socketChannel;
-    AtomicInteger count = new AtomicInteger();
-    public ClientService(){
+public class ClientWorkIterator implements Runnable{
+    private Selector selector;
+    private SocketChannel socketChannel;
+    private Client client = new Client();
+    private int count = 0;
+    private int requestTimes = 0;
+    CountDownLatch countDownLatch;
+    public ClientWorkIterator(){
         this.startClient();
     }
+    protected void setCountDownLatch(CountDownLatch requestCountDown){
+        this.countDownLatch = requestCountDown;
+    }
+    protected void setRequestTimes(int m) { this.requestTimes = m; }
+    protected int getCount(){ return this.count; }
+    @Override
+    public void run(){
+        countDownLatch.countDown();
+        try {
+            countDownLatch.await();
+            for (int i = 0; i < this.requestTimes; i++){
+                this.client.getConnection(socketChannel);
+            }
+            this.count += this.requestTimes;
+            setRequestTimes(0);
+        } catch (InterruptedException e) {
+            System.out.println(e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
     private void startClient() {
-        try { // thread 따로 실행할 필요 없음.
+        try { // thread 따로 실행할 필요 없음.(nonblock)
             selector = Selector.open();
             socketChannel = SocketChannel.open();
             socketChannel.configureBlocking(false);
@@ -35,7 +52,7 @@ public class ClientService {
             }
             return;
         }
-        Thread t = new Thread(){
+        Thread t = new Thread(){ // select() block, thread 따로
             @Override
             public void run() {
                 while (true) {
@@ -52,6 +69,7 @@ public class ClientService {
                             iterator.remove();
                             if (selectionKey.isReadable()) {
                                 //receive response
+                                //selectionKey.interestOps(0);
                             }
                             else if (selectionKey.isConnectable()) {
                                 socketChannel.finishConnect(); // block (connect invoke)
@@ -72,44 +90,11 @@ public class ClientService {
     }
 
     // 연결 끊기 코드
-    void stopClient() {
+    private void stopClient() {
         try {
             if (socketChannel != null && socketChannel.isOpen()) {
                 socketChannel.close(); // socketChannel 필드가 not null, 현재 닫혀있지 않을 경우 SocketChannel 닫기
             }
         } catch (IOException e) {}
-    }
-
-    protected void getConnection(int m) {
-        ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        try {
-            for (int i=0; i<m; i++) {
-                count.set(count.get() + 1); // client request count
-                Future f = executorService.submit(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            Request request = new Request("getConnection");
-                            ByteBuffer byteBuffer = Utilities.convertObjectToBytes(request);
-                            socketChannel.write(byteBuffer);
-                            byteBuffer.clear();
-                            //System.out.printf("getConnection "+Thread.currentThread().getName() + " %d\n");
-                        } catch (Exception e) {
-                            System.out.println(e.getMessage());
-                            throw new RuntimeException(e);
-                        }
-                    }
-                });
-                f.get(); // 큰 의미 없음. 리퀘스트 생성 순서대로 메서드 호출 순서 보장 정도?
-            }
-        } catch (Exception e) {
-            System.out.println("getConnection Failed "+Thread.currentThread().getName());
-            System.out.println(e.getMessage());
-            stopClient();
-        }
-    }
-
-    protected int getCount() {
-        return count.get();
     }
 }

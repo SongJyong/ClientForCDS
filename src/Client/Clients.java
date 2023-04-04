@@ -1,50 +1,55 @@
 package Client;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class Clients {
-    List<ClientService> clients = new Vector<ClientService>();
+    List<ClientWorkIterator> clientWorkIterators = new Vector<ClientWorkIterator>();
     public void connect(int n) throws ExecutionException, InterruptedException {
-        ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        CountDownLatch connectCountDown = new CountDownLatch(n);
         for (int i = 0; i < n; i++){
-            executorService.submit(new Runnable() {
+            Thread connectThread = new Thread(){
                 @Override
                 public void run() {
-                    ClientService c = new ClientService();
-                    clients.add(c);
+                    connectCountDown.countDown();
+                    try {
+                        connectCountDown.await();
+                        ClientWorkIterator c = new ClientWorkIterator();
+                        clientWorkIterators.add(c);
+                    } catch (InterruptedException e) {
+                        System.out.println(e.getMessage());
+                        throw new RuntimeException(e);
+                    }
                 }
-            });
+            };
+            connectThread.start();
         }
         System.out.printf("connect of %d clients is completed \n",n);
     }
     public void start(int n, int m) throws InterruptedException, ExecutionException {
-        if (clients.size() < n){
+        if (clientWorkIterators.size() < n){
             System.out.println("number of clients is less than input n");
             return;
         }
-        ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        AtomicInteger index = new AtomicInteger(clients.size() - n);
+
+        CountDownLatch requestCountDown = new CountDownLatch(n);
+        Iterator<ClientWorkIterator> iterator = clientWorkIterators.iterator();
         for (int j = 0; j < n; j++) {
-            ClientService temp = clients.get(index.get());
-            executorService.submit(new Runnable() {
-                @Override
-                public void run() {
-                    temp.getConnection(m);
-                }
-            });
-            index.set(index.get() + 1);
+            ClientWorkIterator temp = iterator.next();
+            temp.setRequestTimes(m);
+            temp.setCountDownLatch(requestCountDown);
+            new Thread(temp).start();
         }
     }
 
     public int getData(){
         int total = 0;
-        for (ClientService cli : clients){
+        for (ClientWorkIterator cli : clientWorkIterators){
             System.out.printf("client %d \n",cli.getCount());
             total += cli.getCount();
         }

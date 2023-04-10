@@ -18,14 +18,15 @@ public class Main {
             if (!s.isEmpty()) {
                 if (s.equals("s")){
                     try {
-                        clients.start(10,1000);
+                        clients.start(10,10000);
                         Thread.sleep(1000);
-                        clients.start(10,1000);
+                        clients.start(10,10000);
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
                 }
-                if (s.equals("g")) {
+                else if (s.equals("a")) clients.setAffinityOption();
+                else if (s.equals("g")) {
                     System.out.printf("client total: %d \n",clients.getData());
                 }
                 String[] spl = s.split(" ");

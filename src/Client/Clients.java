@@ -5,11 +5,10 @@ import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class Clients {
     List<ClientWorkIterator> clientWorkIterators = new Vector<ClientWorkIterator>();
+    private boolean affinityOption = false;
     public void connect(int n) throws ExecutionException, InterruptedException {
         CountDownLatch connectCountDown = new CountDownLatch(n);
         for (int i = 0; i < n; i++){
@@ -43,6 +42,7 @@ public class Clients {
             ClientWorkIterator temp = iterator.next();
             temp.setRequestTimes(m);
             temp.setCountDownLatch(requestCountDown);
+            if (this.affinityOption) temp.setAffinityOption();
             new Thread(temp).start();
         }
     }
@@ -55,4 +55,6 @@ public class Clients {
         }
         return total;
     }
+
+    public void setAffinityOption(){ this.affinityOption ^= true; }
 }

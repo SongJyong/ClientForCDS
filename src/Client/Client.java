@@ -7,13 +7,12 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
 public class Client {
-    public void getConnection(SocketChannel socketChannel){
+    public void getConnection(SocketChannel socketChannel, Boolean affinityOption){
         try {
-            Request request = new Request("getConnection");
+            Request request = new Request("data",affinityOption);
             ByteBuffer byteBuffer = Utilities.convertObjectToBytes(request);
             socketChannel.write(byteBuffer);
             byteBuffer.clear();
-            //System.out.printf("getConnection "+Thread.currentThread().getName() + " %d\n");
         } catch (Exception e) {
             System.out.println(e.getMessage());
             throw new RuntimeException(e);

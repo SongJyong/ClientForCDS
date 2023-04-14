@@ -10,7 +10,6 @@ public class ClientWorkIterator implements Runnable{
     private Client client = new Client();
     private int count = 0;
     private int requestTimes = 0;
-    private boolean affinityOption = false;
     CountDownLatch countDownLatch;
     public ClientWorkIterator(){
         this.startClient();
@@ -19,7 +18,6 @@ public class ClientWorkIterator implements Runnable{
         this.countDownLatch = requestCountDown;
     }
     protected void setRequestTimes(int m) { this.requestTimes = m; }
-    protected void setAffinityOption() { this.affinityOption ^= true; }
     protected int getCount(){ return this.count; }
     @Override
     public void run(){
@@ -27,11 +25,10 @@ public class ClientWorkIterator implements Runnable{
         try {
             countDownLatch.await();
             for (int i = 0; i < this.requestTimes; i++){
-                this.client.getConnection(socketChannel, this.affinityOption);
+                this.client.getConnection(socketChannel, Clients.affinityOption);
             }
             this.count += this.requestTimes;
             setRequestTimes(0);
-            setAffinityOption();
         } catch (InterruptedException e) {
             System.out.println(e.getMessage());
             throw new RuntimeException(e);

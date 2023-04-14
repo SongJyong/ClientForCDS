@@ -8,7 +8,7 @@ import java.util.concurrent.ExecutionException;
 
 public class Clients {
     List<ClientWorkIterator> clientWorkIterators = new Vector<ClientWorkIterator>();
-    private boolean affinityOption = false;
+    public static boolean affinityOption = false;
     public void connect(int n) throws ExecutionException, InterruptedException {
         CountDownLatch connectCountDown = new CountDownLatch(n);
         for (int i = 0; i < n; i++){
@@ -42,7 +42,6 @@ public class Clients {
             ClientWorkIterator temp = iterator.next();
             temp.setRequestTimes(m);
             temp.setCountDownLatch(requestCountDown);
-            if (this.affinityOption) temp.setAffinityOption();
             new Thread(temp).start();
         }
     }
@@ -55,6 +54,4 @@ public class Clients {
         }
         return total;
     }
-
-    public void setAffinityOption(){ this.affinityOption ^= true; }
 }

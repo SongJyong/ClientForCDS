@@ -9,7 +9,10 @@ public class Utilities {
         try (ObjectOutputStream oos = new ObjectOutputStream(byteArrayOutputStream)) {
             oos.writeObject(obj);
             oos.flush();
-            ByteBuffer byteBuffer = ByteBuffer.wrap(byteArrayOutputStream.toByteArray());
+            ByteBuffer byteBuffer = ByteBuffer.allocate(150);
+            byteBuffer.putInt(byteArrayOutputStream.size());
+            byteBuffer.put(byteArrayOutputStream.toByteArray());
+            //ByteBuffer byteBuffer = ByteBuffer.wrap(byteArrayOutputStream.toByteArray());
             oos.close();
             byteArrayOutputStream.close();
             return byteBuffer;

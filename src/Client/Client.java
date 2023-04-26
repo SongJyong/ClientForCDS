@@ -5,15 +5,12 @@ import Protocol.Utilities;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class Client {
-    AtomicInteger requestId = new AtomicInteger();
     Request request = null;
-    public void getConnection(SocketChannel socketChannel, Boolean affinityOption){
+    public void getConnection(SocketChannel socketChannel, int numberOfConnection){
         try {
-            if (affinityOption) request = new Request(requestId.get(),"data", true);
-            else request = new Request(requestId.incrementAndGet(), "data", false);
+            request = new Request( "data", numberOfConnection);
             ByteBuffer byteBuffer = Utilities.convertObjectToBytes(request);
             byteBuffer.position(0);
             request = null;

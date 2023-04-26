@@ -8,7 +8,7 @@ import java.util.concurrent.ExecutionException;
 
 public class Clients {
     List<ClientWorkIterator> clientWorkIterators = new Vector<ClientWorkIterator>();
-    public static boolean affinityOption = false;
+    public static int needNumberOfConnection = 1;
     public void connect(int n) throws ExecutionException, InterruptedException {
         CountDownLatch connectCountDown = new CountDownLatch(n);
         for (int i = 0; i < n; i++){

@@ -25,9 +25,9 @@ public class ClientWorkIterator implements Runnable{
         try {
             countDownLatch.await();
             for (int i = 0; i < this.requestTimes; i++){
-                this.client.getConnection(socketChannel, Clients.affinityOption);
+                this.client.getConnection(socketChannel, Clients.needNumberOfConnection);
             }
-            this.count += this.requestTimes;
+            this.count += this.requestTimes * Clients.needNumberOfConnection;
             setRequestTimes(0);
         } catch (InterruptedException e) {
             System.out.println(e.getMessage());

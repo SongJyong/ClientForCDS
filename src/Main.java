@@ -16,15 +16,11 @@ public class Main {
                 if (s.equals("s")){
                     try {
                         clients.start(10,10000);
-                        Thread.sleep(2000);
+                        Thread.sleep(3000);
                         clients.start(10,10000);
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
-                }
-                else if (s.equals("a")){
-                    System.out.println("affinity option ON/OFF");
-                    clients.affinityOption ^= true;
                 }
                 else if (s.equals("g")) {
                     System.out.printf("client total: %d \n",clients.getData());
@@ -39,6 +35,10 @@ public class Main {
                         int n = Integer.parseInt(spl[1]);
                         int m = Integer.parseInt(spl[2]);
                         clients.start(n,m);
+                    }
+                    else if (spl[0].equals("a")){
+                        int n = Integer.parseInt(spl[1]);
+                        clients.needNumberOfConnection = n;
                     }
                 } catch (ExecutionException | NumberFormatException | IndexOutOfBoundsException e) {
                     System.out.println("Wrong Input Error");

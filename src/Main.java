@@ -13,32 +13,25 @@ public class Main {
         while (true){
             String s = scanner.nextLine();
             if (!s.isEmpty()) {
-                if (s.equals("s")){
-                    try {
-                        clients.start(10,10000);
-                        Thread.sleep(3000);
-                        clients.start(10,10000);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-                else if (s.equals("g")) {
+                if (s.equals("g")) {
                     System.out.printf("client total: %d \n",clients.getData());
+                    continue;
                 }
                 String[] spl = s.split(" ");
                 try{
+                    int n = Integer.parseInt(spl[1]);
                     if (spl[0].equals("connect")){
-                        int n = Integer.parseInt(spl[1]);
                         clients.connect(n);
                     }
                     else if (spl[0].equals("start")){
-                        int n = Integer.parseInt(spl[1]);
                         int m = Integer.parseInt(spl[2]);
                         clients.start(n,m);
                     }
-                    else if (spl[0].equals("a")){
-                        int n = Integer.parseInt(spl[1]);
+                    else if (spl[0].equals("affinity")){
                         clients.needNumberOfConnection = n;
+                    }
+                    else if (spl[0].equals("wait")){
+                        Thread.sleep(1000*n);
                     }
                 } catch (ExecutionException | NumberFormatException | IndexOutOfBoundsException e) {
                     System.out.println("Wrong Input Error");

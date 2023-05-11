@@ -28,7 +28,7 @@ public class Clients {
             };
             connectThread.start();
         }
-        System.out.printf("connect of %d clients is completed \n",n);
+        System.out.printf("try connect of %d clients is completed \n",n);
     }
     public void start(int n, int m) throws InterruptedException, ExecutionException {
         if (clientWorkIterators.size() < n){

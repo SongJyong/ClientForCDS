@@ -10,7 +10,7 @@ public class Client {
     Request request = null;
     public void getConnection(SocketChannel socketChannel, int numberOfConnection){
         try {
-            request = new Request( "data", numberOfConnection);
+            request = new Request(numberOfConnection);
             ByteBuffer byteBuffer = Utilities.convertObjectToBytes(request);
             byteBuffer.position(0);
             request = null;

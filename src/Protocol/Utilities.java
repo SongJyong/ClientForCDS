@@ -9,7 +9,7 @@ public class Utilities {
         try (ObjectOutputStream oos = new ObjectOutputStream(byteArrayOutputStream)) {
             oos.writeObject(obj);
             oos.flush();
-            ByteBuffer byteBuffer = ByteBuffer.allocate(150);
+            ByteBuffer byteBuffer = ByteBuffer.allocate(100);
             byteBuffer.putInt(byteArrayOutputStream.size());
             byteBuffer.put(byteArrayOutputStream.toByteArray());
             //ByteBuffer byteBuffer = ByteBuffer.wrap(byteArrayOutputStream.toByteArray());
@@ -18,7 +18,7 @@ public class Utilities {
             return byteBuffer;
         }
     }
-
+    /*
     public static Object convertBytesToObject(ByteBuffer byteBuffer){
         byte[] bytes = new byte[byteBuffer.limit()];
         byteBuffer.get(bytes);
@@ -32,4 +32,5 @@ public class Utilities {
             throw new RuntimeException(e);
         }
     }
+     */
 }
